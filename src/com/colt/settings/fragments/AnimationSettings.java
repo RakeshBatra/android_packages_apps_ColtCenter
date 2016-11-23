@@ -28,6 +28,7 @@ public class AnimationSettings extends SettingsPreferenceFragment
     private static final String PREF_TILE_ANIM_STYLE = "qs_tile_animation_style";
     private static final String PREF_TILE_ANIM_DURATION = "qs_tile_animation_duration";
     private static final String PREF_TILE_ANIM_INTERPOLATOR = "qs_tile_animation_interpolator";
+    private static final String KEY_SS_TABS_EFFECT = "tabs_effect";
 
     private ListPreference mToastAnimation;
     private ListPreference mListViewAnimation;
@@ -36,7 +37,8 @@ public class AnimationSettings extends SettingsPreferenceFragment
     private ListPreference mTileAnimationStyle;
     private ListPreference mTileAnimationDuration;
     private ListPreference mTileAnimationInterpolator;
-    
+
+    ListPreference mListViewTabsEffect;
     Toast mToast;
 
     @Override
@@ -44,6 +46,14 @@ public class AnimationSettings extends SettingsPreferenceFragment
         super.onCreate(icicle);
         addPreferencesFromResource(R.xml.colt_settings_animation);
         final ContentResolver resolver = getActivity().getContentResolver();
+
+
+	mListViewTabsEffect = (ListPreference) findPreference(KEY_SS_TABS_EFFECT);
+        int tabsEffect = Settings.System.getInt(getContentResolver(),
+                Settings.System.RR_SETTINGS_TABS_EFFECT, 0);
+        mListViewTabsEffect.setValue(String.valueOf(tabsEffect));
+        mListViewTabsEffect.setSummary(mListViewTabsEffect.getEntry());
+        mListViewTabsEffect.setOnPreferenceChangeListener(this);
 
         mToastAnimation = (ListPreference) findPreference(KEY_TOAST_ANIMATION);
         int toastanimation = Settings.System.getInt(resolver,
@@ -168,6 +178,13 @@ public class AnimationSettings extends SettingsPreferenceFragment
                     value, UserHandle.USER_CURRENT);
             mTileAnimationInterpolator.setSummary(mTileAnimationInterpolator.getEntries()[index]);
             return true;
+	} else if (preference == mListViewTabsEffect) {
+            int value = Integer.valueOf((String) newValue);
+            int index = mListViewTabsEffect.findIndexOfValue((String) newValue);
+            Settings.System.putInt(getContentResolver(),
+                     Settings.System.RR_SETTINGS_TABS_EFFECT, value);
+            mListViewTabsEffect.setSummary(mListViewTabsEffect.getEntries()[index]);
+	  return true;
         }
         return false;
 }
