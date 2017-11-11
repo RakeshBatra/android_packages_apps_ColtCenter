@@ -71,6 +71,7 @@ public class StatusBarSettings extends SettingsPreferenceFragment
         private static final String VOICEMAIL_BREATH = "voicemail_breath";
         private static final String SMS_BREATH = "sms_breath";
         private static final String BREATHING_NOTIFICATIONS = "breathing_notifications";
+	private static final String TEXT_CHARGING_SYMBOL = "text_charging_symbol";
 
 	private static final int STATUS_BAR_BATTERY_STYLE_HIDDEN = 4;
 	private static final int STATUS_BAR_BATTERY_STYLE_TEXT = 6;
@@ -94,6 +95,7 @@ public class StatusBarSettings extends SettingsPreferenceFragment
         private SwitchPreference mVoicemailBreath;
         private SwitchPreference mSmsBreath;
         private PreferenceGroup mBreathingNotifications;
+	private ListPreference mTextChargingSymbol;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -157,6 +159,13 @@ public class StatusBarSettings extends SettingsPreferenceFragment
         mClockDatePosition.setValue(String.valueOf(clockdatePosition));
         mClockDatePosition.setSummary(mClockDatePosition.getEntry());
         mClockDatePosition.setOnPreferenceChangeListener(this);
+
+	mTextChargingSymbol = (ListPreference) findPreference(TEXT_CHARGING_SYMBOL);
+        int textChargingSymbolValue = Settings.Secure.getInt(resolver,
+                Settings.Secure.TEXT_CHARGING_SYMBOL, 0);
+        mTextChargingSymbol.setValue(Integer.toString(textChargingSymbolValue));
+        mTextChargingSymbol.setSummary(mTextChargingSymbol.getEntry());
+	mTextChargingSymbol.setOnPreferenceChangeListener(this);
 
 	mStatusBarBattery = (CMSystemSettingListPreference) findPreference(STATUS_BAR_BATTERY_STYLE);
         enableStatusBarBatteryDependents(mStatusBarBattery.getIntValue(0));
@@ -319,6 +328,13 @@ public class StatusBarSettings extends SettingsPreferenceFragment
             mClockDatePosition.setSummary(mClockDatePosition.getEntries()[index]);
             parseClockDateFormats();
             return true;
+	} else if (preference == mTextChargingSymbol) {
+            int value = Integer.parseInt((String) newValue);
+            int index = mTextChargingSymbol.findIndexOfValue((String) newValue);
+            Settings.Secure.putInt(resolver,
+                    Settings.Secure.TEXT_CHARGING_SYMBOL, value);
+            mTextChargingSymbol.setSummary(mTextChargingSymbol.getEntries()[index]);
+	    return true;
          }
 
         return false;
@@ -328,7 +344,8 @@ public class StatusBarSettings extends SettingsPreferenceFragment
 	 mStatusBarBatteryShowPercent.setEnabled(
                 batteryIconStyle != STATUS_BAR_BATTERY_STYLE_HIDDEN
                 && batteryIconStyle != STATUS_BAR_BATTERY_STYLE_TEXT);
-
+	mTextChargingSymbol.setEnabled(
+		batteryIconStyle == STATUS_BAR_BATTERY_STYLE_TEXT);
  }
 
 	private void setStatusBarDateDependencies() {
